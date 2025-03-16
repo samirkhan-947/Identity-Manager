@@ -87,7 +87,19 @@ namespace IdentityManager.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
-
+        [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel model)
+        {
+            
+            return View(model);
+        }
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
