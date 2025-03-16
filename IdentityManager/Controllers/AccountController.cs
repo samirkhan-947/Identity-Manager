@@ -3,6 +3,7 @@ using IdentityManager.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -41,6 +42,9 @@ namespace IdentityManager.Controllers
                 var result = await _userManager.CreateAsync(user,registerViewModel.Password);
                 if (result.Succeeded) 
                 {
+                    var code  = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callback = Url.Action("ConfirmEmail", "Account", new { userid = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                    await _mailSender.SendEmail(registerViewModel.Email, "Confirm your account - Identity Manager", "Please confirm your account by clicking here: <a href=\"" + callback + "\">link</a>");
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnurl);
                 }
@@ -48,6 +52,21 @@ namespace IdentityManager.Controllers
             }
             
             return View(registerViewModel);
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string userId,string code)
+        {
+            if(userId == null || code == null)
+            {
+                return View("Error");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View("Error");
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+            return View(result.Succeeded? "ConfirmEmail":"Error");
         }
 
 
