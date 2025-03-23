@@ -19,6 +19,10 @@ builder.Services.Configure<IdentityOptions>(opt =>
     opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
     opt.Lockout.MaxFailedAccessAttempts = 2;
 });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Home/Accessdenied");
+});
 builder.Services.AddTransient<IMailSender, EmailSevices>();
 var app = builder.Build();
 
